@@ -42,9 +42,14 @@ st.map(filtered_data)
 
 hour_to_filter = st.slider('hour', 0, 23, 17)  # min: 0h, max: 23h, default: 17h
 
-st.subheader('Raw data')
-st.write(data)
 #test
 if st.checkbox('Show raw data'):
     st.subheader('Raw data')
     st.write(data)
+
+
+uploaded_file = st.file_uploader("Drag and drop a file")
+if uploaded_file is not None:
+     # Can be used wherever a "file-like" object is accepted:
+     dataframe = pd.read_pickle(uploaded_file)
+     st.write(dataframe)
