@@ -4,16 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-streamlit = "*"
-pandas = "*"
-numpy = "*"
-sklearn = "*"
-scikit-learn = "*"
-seaborn = "*"
-matplotlib = "*"
-hyperopt = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "*"
+python_version = "3.9"
