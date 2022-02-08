@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import pickle5 as pickle
 
 st.title('Uber pickups in NYC')
 
@@ -51,5 +52,5 @@ if st.checkbox('Show raw data'):
 uploaded_file = st.file_uploader("Drag and drop a file")
 if uploaded_file is not None:
      # Can be used wherever a "file-like" object is accepted:
-     dataframe = pd.read_pickle(uploaded_file)
+     dataframe = pd.read_csv(uploaded_file)
      st.write(dataframe)
