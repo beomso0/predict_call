@@ -6,13 +6,14 @@ name = "pypi"
 [packages]
 streamlit = "*"
 pandas = "*"
-lightgbm = "*"
-numpy = "==1.22.2"
-plotly = "*"
-matplotlib = "*"
-scikit-learn = "*"
+numpy = "*"
 sklearn = "*"
+scikit-learn = "*"
+lightgbm = "*"
+matplotlib = "*"
 seaborn = "*"
+plotly = "*"
+requests = "*"
 
 [dev-packages]
 
