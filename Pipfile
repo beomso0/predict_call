@@ -9,13 +9,11 @@ pandas = "*"
 numpy = "*"
 sklearn = "*"
 scikit-learn = "*"
-lightgbm = "*"
-matplotlib = "*"
 seaborn = "*"
-plotly = "*"
-requests = "*"
+matplotlib = "*"
+hyperopt = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "*"
