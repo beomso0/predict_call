@@ -19,11 +19,37 @@ model_load_state = st.text('Loading model...')
 model = load_model('test_lgb.pkl')
 model_load_state.text('Model loaded!')
 
+file_uploaded = None
 uploaded_file = st.file_uploader("Drag and drop a file")
 if uploaded_file is not None:
      # Can be used wherever a "file-like" object is accepted:
      dataframe = pd.read_csv(uploaded_file)
      st.write(dataframe)
+     file_uploaded = True
+
+@st.cache
+def preprocess_df(raw_df):
+     pass
+
+predict_done = None
+
+@st.cache
+def make_pred(model,target_df):
+     pass
+
+@st.cache
+def convert_df(df):
+     # IMPORTANT: Cache the conversion to prevent computation on every rerun
+     return df.to_csv().encode('utf-8')
+
+final_csv = convert_df(dataframe)
+
+st.download_button(
+     label="Download Prediction Table",
+     data=final_csv,
+     file_name='prediction.csv',
+     mime='text/csv',
+ )
 
 # DATE_COLUMN = 'date/time'
 # DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
