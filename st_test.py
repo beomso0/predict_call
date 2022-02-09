@@ -9,6 +9,11 @@ import ast
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
 import math
 
+# declare global variables
+file_uploaded = 0
+preprocess_done = 1
+predict_done = 0 
+
 st.title('모델 배포 테스트')
 
 @st.cache
@@ -19,31 +24,38 @@ model_load_state = st.text('Loading model...')
 model = load_model('test_lgb.pkl')
 model_load_state.text('Model loaded!')
 
-file_uploaded = None
 uploaded_file = st.file_uploader("Drag and drop a file")
 if uploaded_file is not None:
      # Can be used wherever a "file-like" object is accepted:
      dataframe = pd.read_csv(uploaded_file)
      st.write(dataframe)
-     file_uploaded = True
+     file_uploaded = 1
+
 
 @st.cache
 def preprocess_df(raw_df):
      pass
 
-predict_done = None
-
 @st.cache
 def make_pred(model,target_df):
-     pass
+     target_inv_trans = lambda call_: np.expm1(call_ ** (10/16))
+     target_df['예측값'] = target_inv_trans(model.predict(target_df))
+     return target_df
 
 @st.cache
 def convert_df(df):
      # IMPORTANT: Cache the conversion to prevent computation on every rerun
      return df.to_csv().encode('utf-8')
 
-if file_uploaded:
-     final_csv = convert_df(dataframe)
+if (file_uploaded == 1) & (preprocess_done == 1):
+     output = make_pred(model,dataframe)
+     predict_done = 1
+
+if predict_done == 1:   
+     st.header('예측완료!')
+     st.write(output)
+
+     final_csv = convert_df(output)
 
      st.download_button(
           label="Download Prediction Table",
