@@ -2,9 +2,22 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import pickle5 as pickle
+import lightgbm as lgb
+from category_encoders.cat_boost import CatBoostEncoder
+import joblib 
+import ast
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
+import math
 
 st.title('모델 배포 테스트')
+
+@st.cache
+def load_model(model_name):
+     return joblib.load(model_name)
+
+model_load_state = st.text('Loading model...')
+model = load_model('test_lgb.pkl')
+model_load_state.text('Model loaded!')
 
 uploaded_file = st.file_uploader("Drag and drop a file")
 if uploaded_file is not None:

@@ -5,6 +5,10 @@ name = "pypi"
 
 [packages]
 pickle5 = "*"
+lightgbm = "*"
+joblib = "*"
+category-encoders = "*"
+sklearn = "*"
 
 [dev-packages]
 
