@@ -42,14 +42,15 @@ def convert_df(df):
      # IMPORTANT: Cache the conversion to prevent computation on every rerun
      return df.to_csv().encode('utf-8')
 
-final_csv = convert_df(dataframe)
+if file_uploaded:
+     final_csv = convert_df(dataframe)
 
-st.download_button(
-     label="Download Prediction Table",
-     data=final_csv,
-     file_name='prediction.csv',
-     mime='text/csv',
- )
+     st.download_button(
+          label="Download Prediction Table",
+          data=final_csv,
+          file_name='prediction.csv',
+          mime='text/csv',
+     )
 
 # DATE_COLUMN = 'date/time'
 # DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
