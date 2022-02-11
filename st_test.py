@@ -11,7 +11,7 @@ import math
 
 # declare global variables
 file_uploaded = 0
-preprocess_done = 1
+preprocess_done = 0
 predict_done = 0 
 
 st.title('모델 배포 테스트')
@@ -20,9 +20,18 @@ st.title('모델 배포 테스트')
 def load_model(model_name):
      return joblib.load(model_name)
 
+@st.cache
+def load_ref(ref_name):
+     return joblib.load(ref_name)
+
+
 model_load_state = st.text('Loading model...')
 model = load_model('test_lgb.pkl')
 model_load_state.text('Model loaded!')
+
+ref_load_state = st.text('Loading Ref...')
+ref = load_ref('PGM_ref.pkl')
+ref_load_state.text('Ref loaded!')
 
 uploaded_file = st.file_uploader("Drag and drop a file")
 if uploaded_file is not None:
@@ -63,6 +72,30 @@ if predict_done == 1:
           file_name='prediction.csv',
           mime='text/csv',
      )
+
+#test
+with st.form("my_form"):
+    st.write("please insert PGM informations")
+    slider_val = st.slider("Form slider")
+    checkbox_val = st.checkbox("Form checkbox")
+
+    # Every form must have a submit button.
+    submitted = st.form_submit_button("Submit")
+    if submitted:
+        st.write("slider", slider_val, "checkbox", checkbox_val)
+
+with st.form(key='columns_in_form'):
+    cols = st.columns(5)
+    for i, col in enumerate(cols):
+        col.selectbox(f'Make a Selection', ['Yes', 'No'], key=i)
+    options = st.multiselect(
+      'What are your favorite colors', ref
+    )
+    submitted = st.form_submit_button('Submit')
+    if submitted:
+         st.write('output', submitted)
+
+
 
 # DATE_COLUMN = 'date/time'
 # DATA_URL = ('https://s3-us-west-2.amazonaws.com/'

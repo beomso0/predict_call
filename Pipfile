@@ -9,6 +9,7 @@ lightgbm = "*"
 joblib = "*"
 category-encoders = "*"
 sklearn = "*"
+dill = "*"
 
 [dev-packages]
 
