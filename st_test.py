@@ -8,11 +8,28 @@ import joblib
 import ast
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
 import math
+import datetime
 
 # declare global variables
+st.set_page_config(layout='wide')
 file_uploaded = 0
 preprocess_done = 0
 predict_done = 0 
+if 'df_to_predict' not in st.session_state:
+     st.session_state.df_to_predict = pd.DataFrame(columns=[
+          'pgm_input',
+          'showhost_input',
+          'weather_input',
+          'weekday_input',
+          'brand_input',
+          'expression_input',
+          'date_input',
+          'time_input',
+          'duration_input',
+          'prd_num_input',
+          'live_input',
+          'holiday_input'
+     ])
 
 st.title('모델 배포 테스트')
 
@@ -30,7 +47,7 @@ model = load_model('test_lgb.pkl')
 model_load_state.text('Model loaded!')
 
 ref_load_state = st.text('Loading Ref...')
-ref = load_ref('PGM_ref.pkl')
+ref = load_ref('ref.pkl')
 ref_load_state.text('Ref loaded!')
 
 uploaded_file = st.file_uploader("Drag and drop a file")
@@ -73,29 +90,96 @@ if predict_done == 1:
           mime='text/csv',
      )
 
+def update_df(
+          pgm_input,
+          showhost_input,
+          weather_input,
+          weekday_input,
+          brand_input,
+          expression_input,
+          date_input,
+          time_input,
+          duration_input,
+          prd_num_input,
+          live_input,
+          holiday_input
+          ):
+     st.session_state.df_to_predict.append({
+               'pgm_input':pgm_input,
+               'showhost_input':showhost_input,
+               'weather_input':weather_input,
+               'weekday_input':weekday_input,
+               'brand_input':brand_input,
+               'expression_input':expression_input,
+               'date_input':date_input,
+               'time_input':time_input,
+               'duration_input':duration_input,
+               'prd_num_input':prd_num_input,
+               'live_input':live_input,
+               'holiday_input':holiday_input
+     },ignore_index=True)
+
+
+col1, col2 = st.columns([1,3])
+
+with col1:
 #test
-with st.form("my_form"):
-    st.write("please insert PGM informations")
-    slider_val = st.slider("Form slider")
-    checkbox_val = st.checkbox("Form checkbox")
+     with st.form(key='columns_in_form'):
+          pgm_input = st.selectbox(
+               'PGM명을 선택하세요', ref['pgm_ref']
+          )
+          showhost_input = st.multiselect(
+               '출연 쇼호스트를 모두 선택하세요', ref['showhost_ref']
+          )
+          weather_input = st.selectbox(
+               '예상 날씨를 선택하세요', ref['weather_ref']
+          )
+          weekday_input = st.selectbox(
+               '요일을 선택하세요', ref['weekday_ref']
+          )
+          brand_input = st.multiselect(
+               '판매 브랜드를 모두 선택하세요', ref['brand_ref']
+          )
+          expression_input = st.multiselect(
+               '사용 예정인 한정표현을 모두 선택하세요', ref['expression_ref']
+          )    
+          date_input = st.date_input(
+               '방송시작일자', datetime.date.today()+datetime.timedelta(7)
+          )
+          time_input = st.number_input(
+               '방송시작시간(0~24)', 0,24
+          )
+          duration_input = st.number_input(
+               '방송 길이(분)', 0,1440
+          )
+          prd_num_input = st.number_input(
+               '판매 상품 개수', 0
+          )
+          live_input = st.checkbox(
+               'LIVE 방송인가요?', True
+          )
+          holiday_input = st.checkbox(
+               '주말 혹은 공휴일인가요?',
+          )    
 
-    # Every form must have a submit button.
-    submitted = st.form_submit_button("Submit")
-    if submitted:
-        st.write("slider", slider_val, "checkbox", checkbox_val)
+          # 제출
+          submitted = st.form_submit_button('Submit',on_click=update_df,args=[
+               pgm_input,
+               showhost_input,
+               weather_input,
+               weekday_input,
+               brand_input,
+               expression_input,
+               date_input,
+               time_input,
+               duration_input,
+               prd_num_input,
+               live_input,
+               holiday_input
+          ])
 
-with st.form(key='columns_in_form'):
-    cols = st.columns(5)
-    for i, col in enumerate(cols):
-        col.selectbox(f'Make a Selection', ['Yes', 'No'], key=i)
-    options = st.multiselect(
-      'What are your favorite colors', ref
-    )
-    submitted = st.form_submit_button('Submit')
-    if submitted:
-         st.write('output', submitted)
-
-
+with col2:
+     st.write(st.session_state.df_to_predict)
 
 # DATE_COLUMN = 'date/time'
 # DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
