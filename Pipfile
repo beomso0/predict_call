@@ -12,6 +12,7 @@ sklearn = "*"
 dill = "*"
 streamlit-aggrid = "*"
 numpy = "*"
+pycaret = "*"
 
 [dev-packages]
 
