@@ -102,14 +102,14 @@ if st.session_state.predict_done == 1:
 
 # sidebar form
 with st.sidebar.form(key='columns_in_form'):
+          
           col1, col2 = st.columns(2)
           with col1:    
                save = st.form_submit_button('저장')                    
           with col2:
                predict = st.form_submit_button('예측')
+               
                #pycaret test
-               if predict:
-                    st.write(models())
 
                #
 
@@ -176,4 +176,5 @@ with st.sidebar.form(key='columns_in_form'):
 # show dataframe
 st.dataframe(st.session_state.df_to_predict.style.format(na_rep='입력없음',precision=0))
 
-
+if predict:
+     st.dataframe(models())
