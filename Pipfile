@@ -10,6 +10,7 @@ joblib = "*"
 category-encoders = "*"
 sklearn = "*"
 dill = "*"
+streamlit-aggrid = "*"
 
 [dev-packages]
 
