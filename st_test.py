@@ -107,6 +107,11 @@ with st.sidebar.form(key='columns_in_form'):
                save = st.form_submit_button('저장')                    
           with col2:
                predict = st.form_submit_button('예측')
+               #pycaret test
+               if predict:
+                    exp1 = setup(st.session_state.df_to_predict)
+
+               #
 
           pgm_input = st.selectbox(
                'PGM명을 선택하세요', ref['pgm_ref']
