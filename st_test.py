@@ -7,7 +7,7 @@ import lightgbm as lgb
 from category_encoders.cat_boost import CatBoostEncoder
 import joblib 
 import ast
-from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 import math
 import datetime
 from pycaret.regression import *
