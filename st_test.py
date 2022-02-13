@@ -10,6 +10,7 @@ import ast
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
 import math
 import datetime
+from pycaret.regression import *
 
 # set overall layout
 st.set_page_config(layout='wide')
