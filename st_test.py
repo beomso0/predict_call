@@ -109,7 +109,7 @@ with st.sidebar.form(key='columns_in_form'):
                predict = st.form_submit_button('예측')
                #pycaret test
                if predict:
-                    exp1 = setup(st.session_state.df_to_predict)
+                    st.write(models())
 
                #
 
