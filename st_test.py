@@ -1,5 +1,7 @@
 # import libraries
 from asyncore import close_all
+from base64 import encode
+from distutils.command.upload import upload
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -44,17 +46,17 @@ if 'df_to_predict' not in st.session_state:
 st.title('모델 배포 테스트')
 
 @st.cache
-def load_model(model_name):
-     return joblib.load(model_name)
+def load_model(model_name, encoder_name):
+     return joblib.load(model_name), joblib.load(encoder_name)
 
 @st.cache
 def load_ref(ref_name):
      return joblib.load(ref_name)
 
 
-model_load_state = st.text('Loading model...')
-model = load_model('test_lgb.pkl')
-model_load_state.text('Model loaded!')
+model_load_state = st.text('Loading model and encoder...')
+model, encoder = load_model('jh_caret/model_compressed.pkl','0214_encoder.pkl')
+model_load_state.text('Model and encoder loaded!')
 
 ref_load_state = st.text('Loading Ref...')
 ref = load_ref('ref.pkl')
@@ -63,10 +65,12 @@ ref_load_state.text('Ref loaded!')
 uploaded_file = st.file_uploader("Drag and drop a file")
 if uploaded_file is not None:
      # Can be used wherever a "file-like" object is accepted:
-     dataframe = pd.read_csv(uploaded_file)
-     st.write(dataframe)
+     # dataframe = pd.read_csv(uploaded_file)
+     X_test = joblib.load(uploaded_file)
      st.session_state.file_uploaded = 1
-
+     X_test = encoder.transform(X_test)
+     pred = predict_model(model, X_test)
+     st.dataframe(pred)
 
 @st.cache
 def preprocess_df(raw_df):
