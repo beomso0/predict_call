@@ -15,7 +15,7 @@ pycaret = "*"
 google-cloud-storage = "*"
 s3fs = "*"
 llvmlite = "*"
-catboost = "*"
+scikit-learn = "*"
 
 [dev-packages]
 
