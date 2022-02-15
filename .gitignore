@@ -1,5 +1,6 @@
 # ignre big model file
 jh_caret/0214_final_reg_saved.pkl
+jh_caret/model_compressed.pkl
 
 #ignore secret key
 .streamlit/
