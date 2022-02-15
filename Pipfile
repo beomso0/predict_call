@@ -12,6 +12,9 @@ sklearn = "*"
 dill = "*"
 streamlit-aggrid = "*"
 pycaret = "*"
+google-cloud-storage = "*"
+s3fs = "*"
+llvmlite = "*"
 
 [dev-packages]
 

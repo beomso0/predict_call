@@ -13,6 +13,19 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 import math
 import datetime
 from pycaret.regression import *
+import s3fs
+import os
+
+# create S3 file system connection object
+fs = s3fs.S3FileSystem(anon=False)
+
+# Retrieve file contents
+@st.cache(ttl=6000)
+def read_file(filename):
+    with fs.open(filename) as f:
+        return f.read().decode("utf-8")
+
+content = read_file("hhxgh/model_compressed.pkl")
 
 # set overall layout
 st.set_page_config(layout='wide')
@@ -45,11 +58,11 @@ if 'df_to_predict' not in st.session_state:
 
 st.title('모델 배포 테스트')
 
-@st.cache
+@st.cache(ttl=6000)
 def load_model(model_name, encoder_name):
      return joblib.load(model_name), joblib.load(encoder_name)
 
-@st.cache
+@st.cache(ttl=6000)
 def load_ref(ref_name):
      return joblib.load(ref_name)
 
@@ -72,17 +85,17 @@ if uploaded_file is not None:
      pred = predict_model(model, X_test)
      st.dataframe(pred)
 
-@st.cache
+@st.cache(ttl=6000)
 def preprocess_df(raw_df):
      pass
 
-@st.cache
+@st.cache(ttl=6000)
 def make_pred(model,target_df):
      target_inv_trans = lambda call_: np.expm1(call_ ** (10/16))
      target_df['예측값'] = target_inv_trans(model.predict(target_df))
      return target_df
 
-@st.cache
+@st.cache(ttl=600)
 def convert_df(df):
      # IMPORTANT: Cache the conversion to prevent computation on every rerun
      return df.to_csv().encode('utf-8')
