@@ -23,7 +23,7 @@ fs = s3fs.S3FileSystem(anon=False)
 @st.cache(ttl=6000)
 def read_file(filename):
     with fs.open(filename) as f:
-        return f.read().decode("utf-8")
+        return joblib.load(f)
 
 
 # set overall layout
@@ -67,7 +67,7 @@ def load_ref(ref_name):
 
 
 model_load_state = st.text('Loading model and encoder...')
-content = read_file("hhxgh/model_compressed.pkl")
+model = read_file("hhxgh/model_compressed.pkl")
 # model, encoder = load_model('jh_caret/model_compressed.pkl','0214_encoder.pkl')
 model_load_state.text('Model and encoder loaded!')
 
