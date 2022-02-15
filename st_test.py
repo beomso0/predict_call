@@ -17,6 +17,7 @@ from pycaret.regression import *
 import s3fs
 import os
 import pickle
+import catboost
 
 # create S3 file system connection object
 fs = s3fs.S3FileSystem(anon=False)
