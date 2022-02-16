@@ -6,18 +6,20 @@ from distutils.command.upload import upload
 import streamlit as st
 import pandas as pd
 import numpy as np
-import lightgbm as lgb
-from category_encoders.cat_boost import CatBoostEncoder
 import joblib 
 import ast
-from sklearn.metrics import mean_absolute_error, mean_squared_error
 import math
 import datetime
-from pycaret.regression import *
+# from pycaret.regression import *
 import s3fs
 import os
 import pickle
 import catboost
+import lightgbm as lgb
+from category_encoders.cat_boost import CatBoostEncoder
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn import metrics
+from sklearn.ensemble import ExtraTreesRegressor
 
 # create S3 file system connection object
 fs = s3fs.S3FileSystem(anon=False)
