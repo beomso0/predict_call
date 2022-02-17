@@ -68,7 +68,8 @@ if 'df_preprocessed' not in st.session_state:
 if 'is_processed' not in st.session_state:
      st.session_state.is_processed = 0
 
-st.title('모델 배포 테스트')
+# title
+st.title('PGM별 콜 예측')
 
 @st.cache(ttl=6000)
 def load_model(model_name, encoder_name):
