@@ -16,13 +16,14 @@ import datetime
 import s3fs
 import os
 import pickle
-import catboost
+from catboost import CatBoostRegressor
 import lightgbm as lgb
 from category_encoders.cat_boost import CatBoostEncoder
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn import metrics
 from sklearn.ensemble import ExtraTreesRegressor
 import preprocess
+
 
 #%%
 # create S3 file system connection object
@@ -89,7 +90,7 @@ def apply_backup(backup):
 
 model_load_state = st.text('Loading model and encoder...')
 # model = read_file("hhxgh/model_compressed.pkl")
-# model, encoder = load_model('jh_caret/0214_final_reg_saved.pkl','0214_encoder.pkl')
+model, encoder = load_model('model/final_model.pkl','cat_encoder.pkl')
 model_load_state.text('Model and encoder loaded!')
 
 ref_load_state = st.text('Loading Ref...')
