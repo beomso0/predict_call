@@ -16,6 +16,7 @@ google-cloud-storage = "*"
 s3fs = "*"
 llvmlite = "*"
 scikit-learn = "*"
+catboost = "*"
 
 [dev-packages]
 

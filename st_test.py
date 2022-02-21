@@ -1,3 +1,4 @@
+#%%
 # import libraries
 from asyncore import close_all
 from base64 import encode
@@ -23,6 +24,7 @@ from sklearn import metrics
 from sklearn.ensemble import ExtraTreesRegressor
 import preprocess
 
+#%%
 # create S3 file system connection object
 fs = s3fs.S3FileSystem(anon=False)
 
@@ -47,12 +49,14 @@ if 'predict_done' not in st.session_state:
 # dataframe 생성
 if 'df_input' not in st.session_state:
      st.session_state.df_input = pd.DataFrame(columns=[
-          'year_input',
-          'month_input',
-          'weekday_input',
+          # 추가: 'temp_input','end_time_input', 'start_time_input', 'date_input','pgm_input
+          # 삭제: 'year_input','month_input','time_input', 'weekday_input'
+          'date_input',
           'holiday_input',
-          'weather_input',
-          'time_input',
+          'temp_input',
+          'pgm_input',
+          'start_time_input',
+          'end_time_input',
           'duration_input',
           'showhost_input',
           'expression_input',
@@ -148,23 +152,23 @@ if st.session_state.predict_done == 1:
 # sidebar form
 with st.sidebar.form(key='columns_in_form'):       
              
-          year_input = st.number_input(
-               '연도', 2022,2027
-          )
-          month_input = st.number_input(
-               '월', 1,12
-          )
-          weekday_input = st.selectbox(
-               '요일', st.session_state.ref['weekday_ref']
+          date_input = st.date_input(
+               '일자', datetime.date.today() + datetime.timedelta(days=7)
           )
           holiday_input = st.checkbox(
-               '주말 혹은 공휴일 여부',
+               '공휴일 여부(주말 제외)',
           )    
-          weather_input = st.selectbox(
-               '예상 날씨', st.session_state.ref['weather_ref']
+          temp_input = st.number_input(
+               '예상 기온', -100,100,0
           )
-          time_input = st.number_input(
+          pgm_input = st.number_input(
+               'PGM 코드', step=1
+          )
+          start_time_input = st.number_input(
                '방송 시작 시각(0~24)', 0,24
+          )
+          end_time_input = st.number_input(
+               '방송 종료 시각(0~24)', 0,24
           )
           duration_input = st.number_input(
                '방송 길이(분)', 0,1440
@@ -202,19 +206,19 @@ with st.sidebar.form(key='columns_in_form'):
           if submitted:
                print(showhost_input)
                st.session_state.df_input = st.session_state.df_input.append({
-                                                                           'showhost_input':showhost_input,
-                                                                           'weather_input':weather_input,
-                                                                           'weekday_input':weekday_input,
-                                                                           'brand_input':brand_input,
-                                                                           'midcat_input':midcat_input,
-                                                                           'expression_input':expression_input,
-                                                                           'year_input':year_input,
-                                                                           'month_input':month_input,
-                                                                           'time_input':time_input,
-                                                                           'duration_input':duration_input,
-                                                                           'live_input':live_input,
-                                                                           'holiday_input':holiday_input,
-                                                                           'price_input':price_input
+                                                                      'date_input':date_input,
+                                                                      'holiday_input':holiday_input,
+                                                                      'temp_input':temp_input,
+                                                                      'pgm_input': pgm_input,
+                                                                      'start_time_input':start_time_input,
+                                                                      'end_time_input':end_time_input,
+                                                                      'duration_input':duration_input,
+                                                                      'showhost_input':showhost_input,
+                                                                      'expression_input':expression_input,
+                                                                      'live_input':live_input,
+                                                                      'midcat_input':midcat_input,
+                                                                      'brand_input':brand_input,
+                                                                      'price_input':price_input,
                                                                  },ignore_index=True)
 
 col1, col2= st.columns([1.5,9])
