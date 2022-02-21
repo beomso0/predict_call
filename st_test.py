@@ -16,7 +16,7 @@ import datetime
 import s3fs
 import os
 import pickle
-# import catboost
+import catboost
 import lightgbm as lgb
 from category_encoders.cat_boost import CatBoostEncoder
 from sklearn.metrics import mean_absolute_error, mean_squared_error
