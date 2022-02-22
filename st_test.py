@@ -306,7 +306,8 @@ if 'test_predicted' not in st.session_state:
 if test_predcit:
      st.session_state.test_predicted = test_predcit(st.session_state.test, model)
 
-st.write(st.session_state.df_predicted)
+if st.session_state.df_predicted is not None:
+     st.write(st.session_state.df_predicted)
 
 # show dataframe
 st.subheader('입력된 데이터')
