@@ -299,15 +299,17 @@ if do_predict:
 test_predcit = st.button('테스트 예측')
 if 'test_predicted' not in st.session_state:
      st.session_state.test_predicted = None
+
+@st.cache(persist=True)
+def do_test_predict():
+     return model.predict(st.session_state.test)
 if test_predcit:
      try:
-          st.session_state.test_predicted = test_predcit(st.session_state.test, model)
+          st.session_state.test_predicted = do_test_predict()
      except Exception as e:
           st.write(traceback.format_exc())
 
-@st.cache(persist=True)
-def test_predict():
-     return model.predict(st.session_state.test)
+
 if st.session_state.test_predicted is not None:
      st.write(st.session_state.test_predicted)
 
