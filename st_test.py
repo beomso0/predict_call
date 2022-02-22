@@ -1,5 +1,6 @@
 #%%
 # import libraries
+import traceback
 from asyncore import close_all
 from base64 import encode
 from cProfile import label
@@ -281,6 +282,7 @@ if predict:
           st.session_state.df_preprocessed = preprocess.process_input(st.session_state.df_input, st.session_state.score, encoder)
      except Exception as e:
           st.error(e)
+          st.write(traceback.format_exc())
      
 
 # show dataframe
