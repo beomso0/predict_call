@@ -90,7 +90,11 @@ def make_pred(df):
      pass
 
 @st.cache(persist=True)
-def load_test(test_name):
+def load_test_x(test_name):
+     return joblib.load(test_name)
+     
+@st.cache(persist=True)
+def load_test_y(test_name):
      return joblib.load(test_name)
 
 @st.cache(persist=True)
@@ -130,7 +134,9 @@ score_load_state.text('Scores loaded!')
 # load ref
 test_load_state = st.text('Loading Test...')
 if 'test' not in st.session_state:
-     st.session_state.test = load_test('scores/X_train_encoded.pkl')
+     st.session_state.test = load_test_x('model/X_train_encoded.pkl')
+if 'test_y' not in st.session_state:
+     st.session_state.test = load_test_y('model/X_train_encoded.pkl')
 test_load_state.text('Test loaded!')
 
 with st.form("백업파일 업로드", clear_on_submit=True):
@@ -319,6 +325,7 @@ st.dataframe(st.session_state.df_input.style.format(precision=0))
 
 if st.session_state.is_predicted == 1:
      st.subheader('전처리된 데이터')
-     st.dataframe(st.session_state.df_preprocessed)
-# if predict:
-#      st.dataframe(models())
+
+
+with st.expander("See explanation"):
+     st.header('모델 재학습')

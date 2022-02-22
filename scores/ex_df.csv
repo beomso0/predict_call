@@ -1,0 +1,4 @@
+﻿date_input,holiday_input,temp_input,pgm_input,start_time_input,end_time_input,duration_input,showhost_input,expression_input,live_input,midcat_input,brand_input,price_input
+2022-01-01,False,-6,211544,8,11,180,"['왕영은', '하은지', '박민아']",['단하루'],True,['주방잡화'],['뉴트리닌자'],[48]
+2022-03-01,True,-11,219148,20,20,59,"['김미정', '이연서']",['없음'],True,"['준보석', '진보석(일반)']",['한국금거래소'],"[1000, 1200, 1300, 1500]"
+2022-03-03,False,1,223258,0,1,80,"['이거성', '서은경']",['방송에서만'],False,['회원권/이용권'],['제주신화월드'],"[140, 150]"
