@@ -6,7 +6,7 @@ def process_input(input_df, score_lists, cat_encoder):
     df.columns = [col[:-6] for col in df.columns]
     df = df.replace({True:1, False:0})
     df['pgm'] = df['pgm'].astype('str')
-    df['showhost'] = df['showhost'].apply(lambda x: str(x)[2:-2].replace("'",''))
+    df['showhost'] = df['showhost'].apply(lambda x: str(sorted(x))[2:-2].replace("'",''))
     
     df['year'] = df['date'].apply(lambda x: x.year)
     df['month'] = df['date'].apply(lambda x: x.month)
