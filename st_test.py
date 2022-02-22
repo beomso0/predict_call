@@ -311,7 +311,7 @@ def do_test_predict():
      return transformer.inverse_transform(model.predict(st.session_state.test).reshape(-1,1))
 if test_predcit:
      try:
-          st.session_state.test_y['예측값'] = do_test_predict()
+          st.session_state.test_y['예측값'] = pd.Series(do_test_predict())
      except Exception as e:
           st.write(traceback.format_exc())
 
