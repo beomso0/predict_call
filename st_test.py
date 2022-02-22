@@ -309,9 +309,13 @@ if 'test_predicted' not in st.session_state:
 @st.cache(persist=True)
 def do_test_predict():
      return transformer.inverse_transform(model.predict(st.session_state.test).reshape(-1,1))
+@st.cache(persist=True)
+def add_predict():
+     st.session_state.test_y['예측값'] = do_test_predict()
+
 if test_predcit:
      try:
-          st.session_state.test_y['예측값'] = do_test_predict()
+          add_predict()
      except Exception as e:
           st.write(traceback.format_exc())
 
