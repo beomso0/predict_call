@@ -134,7 +134,7 @@ score_load_state.text('Scores loaded!')
 # load ref
 test_load_state = st.text('Loading Test...')
 if 'test' not in st.session_state:
-     st.session_state.test = load_test('test.pkl')
+     st.session_state.test = load_test('scores/X_train_encoded.pkl')
 test_load_state.text('Test loaded!')
 
 with st.form("백업파일 업로드", clear_on_submit=True):
