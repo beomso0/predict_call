@@ -3,10 +3,24 @@ import numpy as np
 import pandas as pd
 
 def process_input(input_df, score_lists, cat_encoder):
-    df = input_df
+    df = input_df.rename(columns={
+      'date_input': 'date',
+      'holiday_input': 'holiday',
+      'temp_input': 'temp',
+      'pgm_input': 'pgm',
+      'start_time_input': 'start_time',
+      'end_time_input': 'end_time',
+      'duration_input': 'duration',
+      'showhost_input': 'showhost',
+      'expression_input': 'expression',
+      'live_input': 'live',
+      'midcat_input': 'midcat',
+      'brand_input': 'brand',
+      'price_input': 'price',
+    })
     
-    df.columns = [col[:-6] for col in df.columns]
-    df = df.replace({True:1, False:0})
+    # df.columns = [col[:-6] for col in df.columns]
+    # df = df.replace({True:1, False:0})
     df['pgm'] = df['pgm'].astype('str')
     df['showhost'] = df['showhost'].apply(lambda x: str(x)[2:-2].replace("'",''))
     
