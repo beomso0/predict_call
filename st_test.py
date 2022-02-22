@@ -300,7 +300,10 @@ test_predcit = st.button('테스트 예측')
 if 'test_predicted' not in st.session_state:
      st.session_state.test_predicted = None
 if test_predcit:
-     st.session_state.test_predicted = test_predcit(st.session_state.test, model)
+     try:
+          st.session_state.test_predicted = test_predcit(st.session_state.test, model)
+     except Exception as e:
+          st.write(traceback.format_exc())
 
 @st.cache(persist=True)
 def test_predict():
