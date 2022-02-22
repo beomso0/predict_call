@@ -265,7 +265,7 @@ with col1:
           file_name=f'{str(datetime.datetime.now())[:-7]}_backup.pkl',
      )             
      # predict button
-     predict = st.button('예측')
+     do_predict = st.button('예측')
      # delete button
      if len(st.session_state.df_input)!=0:  
           delete_row = st.button('행 삭제하기')
@@ -286,7 +286,7 @@ with col2:
                except:
                    st.error('삭제 행의 범위를 다시 확인해주세요') 
 
-if predict:
+if do_predict:
      # preprocess
      try:
           st.session_state.df_preprocessed = preprocess.process_input(st.session_state.df_input, st.session_state.score, encoder)
