@@ -94,10 +94,6 @@ def load_test(test_name):
      return joblib.load(test_name)
 
 @st.cache(persist=True)
-def test_predict(df, model):
-     return model.predict(df)
-
-@st.cache(persist=True)
 def load_ref(ref_name):
      return joblib.load(ref_name)
 
@@ -306,6 +302,9 @@ if 'test_predicted' not in st.session_state:
 if test_predcit:
      st.session_state.test_predicted = test_predcit(st.session_state.test, model)
 
+@st.cache(persist=True)
+def test_predict():
+     return model.predict(st.session_state.test)
 if st.session_state.test_predicted is not None:
      st.write(st.session_state.test_predicted)
 
