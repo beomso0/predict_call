@@ -22,6 +22,7 @@ from category_encoders.cat_boost import CatBoostEncoder
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn import metrics
 from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.preprocessing import PowerTransformer
 import preprocess
 
 
@@ -47,7 +48,7 @@ if 'preprocess_done' not in st.session_state:
 if 'predict_done' not in st.session_state:
      st.session_state.predict_done = 0
 
-# dataframe 생성
+# input dataframe 생성
 if 'df_input' not in st.session_state:
      st.session_state.df_input = pd.DataFrame(columns=[
           # 추가: 'temp_input','end_time_input', 'start_time_input', 'date_input','pgm_input
@@ -70,33 +71,56 @@ if 'df_input' not in st.session_state:
 # 전처리 된 테이블 생성
 if 'df_preprocessed' not in st.session_state:
      st.session_state.df_preprocessed = None
-if 'is_processed' not in st.session_state:
-     st.session_state.is_processed = 0
+if 'is_predicted' not in st.session_state:
+     st.session_state.is_predicted = 0
+# make predicted dataframe
+if 'df_pred' not in st.session_state:
+     st.session_state.df_pred = None
 
 # title
 st.title('PGM별 콜 예측')
 
 @st.cache(ttl=6000)
-def load_model(model_name, encoder_name):
-     return joblib.load(model_name), joblib.load(encoder_name)
+def load_model(model_name, encoder_name, transformer_name):
+     return joblib.load(model_name), joblib.load(encoder_name), joblib.load(transformer_name)
+
+@st.cache(ttl=6000)
+def make_pred(df):
+     pass
 
 @st.cache(persist=True)
 def load_ref(ref_name):
      return joblib.load(ref_name)
 
+@st.cache(persist=True)
+def load_score(brand_name, limit_name, midcat_name):
+     score_lists = [
+          pd.read_pickle(midcat_name),
+          pd.read_pickle(brand_name),
+          pd.read_pickle(limit_name)
+     ]
+     return score_lists
+
 @st.cache(ttl=6000)
 def apply_backup(backup):
      st.session_state.df_input = backup
 
+# load model, encoder, transformer
 model_load_state = st.text('Loading model and encoder...')
-# model = read_file("hhxgh/model_compressed.pkl")
-model, encoder = load_model('model/final_model.pkl','cat_encoder.pkl')
+model, encoder, transformer = load_model('model/final_model.pkl','model/cat_encoder.pkl','model/boxcox_transformer.pkl')
 model_load_state.text('Model and encoder loaded!')
 
+# load ref
 ref_load_state = st.text('Loading Ref...')
 if 'ref' not in st.session_state:
      st.session_state.ref = load_ref('ref.pkl')
 ref_load_state.text('Ref loaded!')
+
+# load score
+score_load_state = st.text('Loading Scores...')
+if 'score' not in st.session_state:
+     st.session_state.score = load_score('scores/brand_score.pkl','scores/limit_score.pkl','scores/mid_cat_score.pkl')
+score_load_state.text('Scores loaded!')
 
 with st.form("백업파일 업로드", clear_on_submit=True):
      file = st.file_uploader("백업 파일을 드래그하여 업로드하세요. 업로드 시 현재 데이터는 사라지니 주의해주세요.")
@@ -229,7 +253,9 @@ with col1:
           data= pickle.dumps(st.session_state.df_input),
           file_name=f'{str(datetime.datetime.now())[:-7]}_backup.pkl',
      )             
+     # predict button
      predict = st.button('예측')
+     # delete button
      if len(st.session_state.df_input)!=0:  
           delete_row = st.button('행 삭제하기')
 with col2:
@@ -242,6 +268,7 @@ with col2:
                (0,1),
                key='del_slider'
           )
+          # delete row
           if delete_row:
                try:
                     st.session_state.df_input = st.session_state.df_input.drop(labels=list(range(del_idx[0],del_idx[1]+1)),axis=0).reset_index(drop=True)
@@ -249,17 +276,18 @@ with col2:
                    st.error('삭제 행의 범위를 다시 확인해주세요') 
 
 if predict:
+     # preprocess
      try:
           st.session_state.df_preprocessed = preprocess.process_input(st.session_state.df_input)
-          st.session_state.is_processed = 1
      except Exception as e:
           st.error(e)
+     
 
 # show dataframe
 st.subheader('입력된 데이터')
 st.dataframe(st.session_state.df_input.style.format(precision=0))
 
-if st.session_state.is_processed == 1:
+if st.session_state.is_predicted == 1:
      st.subheader('전처리된 데이터')
      st.dataframe(st.session_state.df_preprocessed)
 # if predict:
