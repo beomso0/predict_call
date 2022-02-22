@@ -302,7 +302,7 @@ if 'test_predicted' not in st.session_state:
 
 @st.cache(persist=True)
 def do_test_predict():
-     return transformer.inverse_transform(model.predict(st.session_state.test))
+     return transformer.inverse_transform(model.predict(st.session_state.test).reshape(-1,1))
 if test_predcit:
      try:
           st.session_state.test_predicted = do_test_predict()
