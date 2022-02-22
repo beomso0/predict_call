@@ -134,7 +134,7 @@ score_load_state.text('Scores loaded!')
 # load ref
 test_load_state = st.text('Loading Test...')
 if 'test' not in st.session_state:
-     st.session_state.test = load_test_x('model/X_train_encoded.pkl')
+     st.session_state.test = load_test_x('model/X_test_encoded.pkl')
 if 'test_y' not in st.session_state:
      st.session_state.test_y = load_test_y('model/y_test.pkl')
 st.dataframe(st.session_state.test_y)
