@@ -300,7 +300,7 @@ if predict:
 
 
 # test_predict
-test_predcit = st.button('예측')
+test_predcit = st.button('테스트 예측')
 if 'test_predicted' not in st.session_state:
      st.session_state.test_predicted = None
 if test_predcit:
