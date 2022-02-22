@@ -136,7 +136,8 @@ test_load_state = st.text('Loading Test...')
 if 'test' not in st.session_state:
      st.session_state.test = load_test_x('model/X_train_encoded.pkl')
 if 'test_y' not in st.session_state:
-     st.session_state.test_y = pd.DataFrame(load_test_y('model/y_test.pkl'))
+     st.session_state.test_y = load_test_y('model/y_test.pkl')
+st.dataframe(st.session_state.test_y)
 test_load_state.text('Test loaded!')
 
 with st.form("백업파일 업로드", clear_on_submit=True):
@@ -309,18 +310,15 @@ if 'test_predicted' not in st.session_state:
 @st.cache(persist=True)
 def do_test_predict():
      return transformer.inverse_transform(model.predict(st.session_state.test).reshape(-1,1))
-@st.cache(persist=True)
-def add_predict():
-     st.session_state.test_y['예측값'] = do_test_predict()
-
 if test_predcit:
      try:
-          add_predict()
+          st.session_state.test_predicted = do_test_predict()
      except Exception as e:
           st.write(traceback.format_exc())
 
 
-st.dataframe(st.session_state.test_y)
+if st.session_state.test_predicted is not None:
+     st.write(st.session_state.test_predicted)
 
 # show dataframe
 st.subheader('입력된 데이터')
