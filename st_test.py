@@ -90,6 +90,14 @@ def make_pred(df):
      pass
 
 @st.cache(persist=True)
+def load_test(test_name):
+     return joblib.load(test_name)
+
+@st.cache(persist=True)
+def test_predict(df, model):
+     return model.predict(df)
+
+@st.cache(persist=True)
 def load_ref(ref_name):
      return joblib.load(ref_name)
 
@@ -122,6 +130,12 @@ score_load_state = st.text('Loading Scores...')
 if 'score' not in st.session_state:
      st.session_state.score = load_score('scores/brand_score.pkl','scores/limit_score.pkl','scores/mid_cat_score.pkl')
 score_load_state.text('Scores loaded!')
+
+# load ref
+test_load_state = st.text('Loading Test...')
+if 'test' not in st.session_state:
+     st.session_state.test = load_test('test.pkl')
+test_load_state.text('Test loaded!')
 
 with st.form("백업파일 업로드", clear_on_submit=True):
      file = st.file_uploader("백업 파일을 드래그하여 업로드하세요. 업로드 시 현재 데이터는 사라지니 주의해주세요.")
@@ -283,7 +297,16 @@ if predict:
      except Exception as e:
           st.error(e)
           st.write(traceback.format_exc())
-     
+
+
+# test_predict
+test_predcit = st.button('예측')
+if 'test_predicted' not in st.session_state:
+     st.session_state.test_predicted = None
+if test_predcit:
+     st.session_state.test_predicted = test_predcit(st.session_state.test, model)
+
+st.write(st.session_state.df_predicted)
 
 # show dataframe
 st.subheader('입력된 데이터')
