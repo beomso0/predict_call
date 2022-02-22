@@ -278,7 +278,7 @@ with col2:
 if predict:
      # preprocess
      try:
-          st.session_state.df_preprocessed = preprocess.process_input(st.session_state.df_input)
+          st.session_state.df_preprocessed = preprocess.process_input(st.session_state.df_input, st.session_state.score, encoder)
      except Exception as e:
           st.error(e)
      
