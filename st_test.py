@@ -87,7 +87,8 @@ def load_model(model_name, encoder_name, transformer_name):
 
 @st.cache(ttl=6000)
 def make_pred(df):
-     pass
+     encoded_df = preprocess.process_input(df, st.session_state.score, encoder)
+     return transformer.inverse_transform(model.predict(encoded_df).reshape(-1,1))
 
 @st.cache(persist=True)
 def load_test_x(test_name):
@@ -128,7 +129,7 @@ ref_load_state.text('Ref loaded!')
 # load score
 score_load_state = st.text('Loading Scores...')
 if 'score' not in st.session_state:
-     st.session_state.score = load_score('scores/brand_score.pkl','scores/limit_score.pkl','scores/mid_cat_score.pkl')
+     st.session_state.score = load_score('model/brand_score.pkl','model/expression_score.pkl','model/midcat_score.pkl')
 score_load_state.text('Scores loaded!')
 
 # load ref
@@ -297,13 +298,12 @@ with col2:
 if do_predict:
      # preprocess
      try:
-          st.session_state.df_preprocessed = preprocess.process_input(st.session_state.df_input, st.session_state.score, encoder)
+          st.session_state
      except Exception as e:
           st.error(e)
           st.write(traceback.format_exc())
 
-
-# test_predict
+# test_predicts
 test_predcit = st.button('테스트 예측')
 if 'test_predicted' not in st.session_state:
      st.session_state.test_predicted = None
