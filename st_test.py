@@ -106,9 +106,9 @@ def load_score(brand_name, limit_name, midcat_name):
 def get_example_train():
      return preprocess.process_backup('example_df.csv')
 
-'''
-DO TRAIN!!
-'''
+# '''
+# DO TRAIN!!
+# '''
 # @st.cache(ttl=6000)
 # def do_train():
 #      pass
