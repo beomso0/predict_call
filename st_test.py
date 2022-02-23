@@ -27,6 +27,7 @@ from sklearn import metrics
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.preprocessing import PowerTransformer
 import preprocess
+import copy
 
 
 #%%
@@ -88,11 +89,11 @@ def make_pred(df):
      encoded_df = preprocess.process_input(df, st.session_state.score, encoder)
      return pd.Series(transformer.inverse_transform(model.predict(encoded_df).reshape(-1,1)).reshape(-1),name='prediction').apply(round)
 
-@st.cache(persist=True)
+@st.cache(ttl=6000)
 def load_ref(ref_name):
      return joblib.load(ref_name)
 
-@st.cache(persist=True)
+@st.cache(ttl=6000)
 def load_score(brand_name, limit_name, midcat_name):
      score_lists = [
           pd.read_pickle(midcat_name),
@@ -100,6 +101,19 @@ def load_score(brand_name, limit_name, midcat_name):
           pd.read_pickle(limit_name)
      ]
      return score_lists
+
+@st.cache(ttl=6000)
+def get_example_train():
+     return preprocess.process_backup('example_df.csv')
+
+'''
+DO TRAIN!!
+'''
+# @st.cache(ttl=6000)
+# def do_train():
+#      pass
+
+train_example = get_example_train()
 
 # load model, encoder, transformer
 model_load_state = st.text('Loading model and encoder...')
@@ -118,23 +132,16 @@ if 'score' not in st.session_state:
      st.session_state.score = load_score('model/brand_score.pkl','model/expression_score.pkl','model/midcat_score.pkl')
 score_load_state.text('Scores loaded!')
 
-# load test
-# test_load_state = st.text('Loading Test...')
-# if 'test' not in st.session_state:
-#      st.session_state.test = load_test_x('model/X_test_encoded.pkl')
-# if 'test_y' not in st.session_state:
-#      f = load_test_y('model/y_test.pkl')
-#      st.session_state.test_y = pd.DataFrame(f)
-# # st.dataframe(st.session_state.test_y)
-# test_load_state.text('Test loaded!')
-
 with st.form("백업파일 업로드", clear_on_submit=True):
      file = st.file_uploader("백업 파일을 드래그하여 업로드하세요. 업로드 시 현재 데이터는 사라지니 주의해주세요.")
      submitted = st.form_submit_button("업로드 및 적용")
 
      if submitted and file is not None:
           st.session_state.df_input = preprocess.process_backup(file)
-
+st.text('')
+st.text('')
+st.text('')
+st.text('')
 def convert_df(df):
      # IMPORTANT: Cache the conversion to prevent computation on every rerun
      return df.to_csv(index=False).encode('utf-8-sig')
@@ -247,7 +254,6 @@ with col2:
                     st.session_state.df_input = st.session_state.df_input.drop(labels=list(range(del_idx[0],del_idx[1]+1)),axis=0).reset_index(drop=True)
                except:
                    st.error('삭제 행의 범위를 다시 확인해주세요') 
-
 # show dataframe
 col1, col2, col3, col4 = st.columns([4,1.9,1.5,10])
 with col1:
@@ -271,7 +277,10 @@ if do_predict:
           st.write(traceback.format_exc())
 
 st.dataframe(st.session_state.df_input)
-
+st.text('')
+st.text('')
+st.text('')
+st.text('')
 # show prediction
 if st.session_state.df_predicted is not None:     
      st.subheader('예측결과')
@@ -282,26 +291,19 @@ if st.session_state.df_predicted is not None:
           file_name=str(datetime.datetime.now())[:-7]+'_prediction.csv',
           mime='text/csv',
      )
-
-@st.cache(ttl=6000)
-def get_example_train(ex_name):
-     return preprocess.process_backup(ex_name)
-
-@st.cache(ttl=6000)
-def do_train():
-     pass
-
-train_example = get_example_train('example_df.csv')
-
+st.text('')
+st.text('')
+st.text('')
+st.text('')
 with st.expander("모델 재학습"):     
      with st.form("학습용 데이터 업로드", clear_on_submit=True):          
           st.text('이미 학습한 데이터를 재학습하지 않도록 주의해주세요')
-          st.text('학습 데이터는, 예측 결과 파일의 "prediction" 칼럼명을 "target"으로 바꾼 후, 실제 인입콜을 해당 칼럼에 입력한 데이터셋입니다.')
-          st.dataframe(train_example.style.bar(subset=['target'],color='#239b8a',vmin=0,vmax=3000))
+          st.text('학습용 데이터: 예측결과 파일의 "prediction" 칼럼을 "target"(실제 인입콜 수)으로 대체한 데이터셋')
+          st.text('<예시>')
+          st.dataframe(train_example)
           file = st.file_uploader("학습용 데이터를 업로드 해주세요")
           submitted = st.form_submit_button("업로드 및 학습 시작")
           if submitted and file is not None:
                # do something
-               do_train() 
-
+               pass
      
