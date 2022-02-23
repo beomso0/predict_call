@@ -79,6 +79,8 @@ if 'df_predicted' not in st.session_state:
 
 # title
 st.title('PGM별 콜 예측')
+st.text('')
+st.text('')
 
 @st.cache(ttl=6000)
 def load_model(model_name, encoder_name, transformer_name):
@@ -116,32 +118,27 @@ def get_example_train():
 train_example = get_example_train()
 
 # load model, encoder, transformer
-model_load_state = st.text('Loading model and encoder...')
+# model_load_state = st.text('Loading model and encoder...')
 model, encoder, transformer = load_model('model/final_model.pkl','model/cat_encoder.pkl','model/boxcox_transformer.pkl')
-model_load_state.text('Model and encoder loaded!')
+# model_load_state.text('Model and encoder loaded!')
 
 # load ref
-ref_load_state = st.text('Loading Ref...')
+# ref_load_state = st.text('Loading Ref...')
 if 'ref' not in st.session_state:
      st.session_state.ref = load_ref('ref.pkl')
-ref_load_state.text('Ref loaded!')
+# ref_load_state.text('Ref loaded!')
 
 # load score
-score_load_state = st.text('Loading Scores...')
+# score_load_state = st.text('Loading Scores...')
 if 'score' not in st.session_state:
      st.session_state.score = load_score('model/brand_score.pkl','model/expression_score.pkl','model/midcat_score.pkl')
-score_load_state.text('Scores loaded!')
-st.text('')
-st.text('')
+# score_load_state.text('Scores loaded!')
 with st.form("백업파일 업로드", clear_on_submit=True):
      file = st.file_uploader("백업 파일을 드래그하여 업로드하세요. 업로드 시 현재 데이터는 사라지니 주의해주세요.")
      submitted = st.form_submit_button("업로드 및 적용")
 
      if submitted and file is not None:
           st.session_state.df_input = preprocess.process_backup(file)
-st.text('')
-st.text('')
-st.text('')
 st.text('')
 def convert_df(df):
      # IMPORTANT: Cache the conversion to prevent computation on every rerun
@@ -280,8 +277,6 @@ if do_predict:
 st.dataframe(st.session_state.df_input)
 st.text('')
 st.text('')
-st.text('')
-st.text('')
 # show prediction
 if st.session_state.df_predicted is not None:     
      st.subheader('예측결과')
@@ -292,8 +287,6 @@ if st.session_state.df_predicted is not None:
           file_name=str(datetime.datetime.now())[:-7]+'_prediction.csv',
           mime='text/csv',
      )
-st.text('')
-st.text('')
 st.text('')
 st.text('')
 with st.expander("모델 재학습"):     
