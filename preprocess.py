@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+import copy
 
 def process_input(input_df,score_lists,cat_encoder):
-    df = input_df
+    df = copy.deepcopy(input_df)
     
     df.columns = [col[:-6] for col in df.columns]
     df = df.replace({True:1, False:0})
@@ -12,7 +13,6 @@ def process_input(input_df,score_lists,cat_encoder):
     df['midcat_num'] = df['midcat'].apply(lambda x: len(x))
     df['brand_num'] = df['brand'].apply(lambda x: len(x))
     df['expression_num'] = df['expression'].apply(lambda x: len(x))
-    df['product_num'] = df['price'].apply(lambda x: len(x))
      
     df['showhost'] = df['showhost'].apply(lambda x: str(sorted(x))[2:-2].replace("'",''))
     
@@ -30,9 +30,9 @@ def process_input(input_df,score_lists,cat_encoder):
     df['end_time_sin'] = np.sin(2*np.pi*df['end_time']/24)
     df['end_time_cos'] = np.cos(2*np.pi*df['end_time']/24)
     
-    df['price_min'] = df['price'].apply(lambda x: min(x))
-    df['price_max'] = df['price'].apply(lambda x: max(x))
-    df['price_mean'] = df['price'].apply(lambda x: np.mean(x))
+    df['price_min'] = df['price_min']*1000
+    df['price_max'] = df['price_max']*1000
+    df['price_mean'] = df['price_mean']*1000
     
     
     def make_top_col(brand_list,score_df,col_name):
@@ -63,7 +63,7 @@ def process_input(input_df,score_lists,cat_encoder):
     df['expression3'] = df['top_expression'].apply(lambda x: x[2] if len(x)>=3 else x[0])
     
     drop_cols = ['date','year','month','weekday','start_time','end_time',
-                 'midcat','brand','expression','price','top_midcat','top_brand','top_expression']
+                 'midcat','brand','expression','top_midcat','top_brand','top_expression']
     df = df.drop(drop_cols, axis=1)
     
     df = df[['pgm','live','showhost','duration','temp','holiday',
