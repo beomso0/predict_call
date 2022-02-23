@@ -317,7 +317,7 @@ with st.expander("모델 재학습"):
      with st.form("학습용 데이터 업로드", clear_on_submit=True):          
           st.text('이미 학습한 데이터를 재학습하지 않도록 주의해주세요')
           st.text('학습 데이터는, 예측 결과 파일의 "prediction" 칼럼명을 "target"으로 바꾼 후, 실제 인입콜을 해당 칼럼에 입력한 데이터셋입니다.')
-          st.dataframe(train_example)
+          st.dataframe(train_example.style.bar(subset=['target'],color='#239b8a',vmin=0,vmax=3000))
           file = st.file_uploader("학습용 데이터를 업로드 해주세요")
           submitted = st.form_submit_button("업로드 및 학습 시작")
           if submitted and file is not None:
