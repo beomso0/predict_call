@@ -33,13 +33,6 @@ import preprocess
 # create S3 file system connection object
 fs = s3fs.S3FileSystem(anon=False)
 
-# Retrieve file contents
-@st.cache(ttl=6000)
-def read_file(filename):
-    with fs.open(filename) as f:
-        return joblib.load(f)
-
-
 # set overall layout
 st.set_page_config(layout='wide')
 
@@ -96,14 +89,6 @@ def make_pred(df):
      return pd.Series(transformer.inverse_transform(model.predict(encoded_df).reshape(-1,1)).reshape(-1),name='prediction').apply(round)
 
 @st.cache(persist=True)
-def load_test_x(test_name):
-     return joblib.load(test_name)
-     
-@st.cache(persist=True)
-def load_test_y(test_name):
-     return joblib.load(test_name)
-
-@st.cache(persist=True)
 def load_ref(ref_name):
      return joblib.load(ref_name)
 
@@ -150,11 +135,6 @@ with st.form("백업파일 업로드", clear_on_submit=True):
      if submitted and file is not None:
           st.session_state.df_input = preprocess.process_backup(file)
 
-@st.cache(ttl=6000)
-def preprocess_df(raw_df):
-     pass
-
-@st.cache(ttl=600)
 def convert_df(df):
      # IMPORTANT: Cache the conversion to prevent computation on every rerun
      return df.to_csv(index=False).encode('utf-8-sig')
