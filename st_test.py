@@ -131,7 +131,8 @@ score_load_state = st.text('Loading Scores...')
 if 'score' not in st.session_state:
      st.session_state.score = load_score('model/brand_score.pkl','model/expression_score.pkl','model/midcat_score.pkl')
 score_load_state.text('Scores loaded!')
-
+st.text('')
+st.text('')
 with st.form("백업파일 업로드", clear_on_submit=True):
      file = st.file_uploader("백업 파일을 드래그하여 업로드하세요. 업로드 시 현재 데이터는 사라지니 주의해주세요.")
      submitted = st.form_submit_button("업로드 및 적용")
