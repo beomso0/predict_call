@@ -103,7 +103,6 @@ if 'ref' not in st.session_state:
 if 'score' not in st.session_state:
      st.session_state.score = load_score('model/brand_score.pkl','model/expression_score.pkl','model/midcat_score.pkl')
 
-train_example = get_example_train()
 model, encoder, transformer = load_model(f'model/final_model.pkl','model/cat_encoder.pkl','model/boxcox_transformer.pkl')
 
 with st.form("백업파일 업로드", clear_on_submit=True):
