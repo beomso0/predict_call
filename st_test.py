@@ -29,6 +29,7 @@ from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.preprocessing import PowerTransformer
 import preprocess
 import copy
+import os
 
 
 #%%
@@ -85,7 +86,8 @@ st.text('')
 
 @st.cache(ttl=6000)
 def load_model(model_name, encoder_name, transformer_name):
-     return joblib.load(model_name), joblib.load(encoder_name), joblib.load(transformer_name)
+     with fs.open(model_name) as f1,fs.open(encoder_name) as f2,fs.open(transformer_name) as f3: 
+          return joblib.load(f1), joblib.load(f2), joblib.load(f3)
 
 @st.cache(ttl=6000)
 def make_pred(df):
