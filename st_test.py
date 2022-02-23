@@ -161,7 +161,7 @@ with st.sidebar.form(key='columns_in_form'):
                '예상 기온', -100,100,0
           )
           pgm_input = st.number_input(
-               'PGM 코드', step=1
+               'PGM 코드', 0, 9999999
           )
           start_time_input = st.number_input(
                '방송 시작 시각(0~24)', 0,24
