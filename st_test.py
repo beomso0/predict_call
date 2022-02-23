@@ -6,6 +6,8 @@ from base64 import encode
 from cProfile import label
 from concurrent.futures import process
 from distutils.command.upload import upload
+from matplotlib.pyplot import axis
+from pygments import highlight
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -66,7 +68,10 @@ if 'df_input' not in st.session_state:
           'live_input',
           'midcat_input',
           'brand_input',
-          'price_input',
+          'price_min_input',
+          'price_max_input',
+          'price_mean_input',
+          'product_num_input'
      ])
 
 # 전처리 된 테이블 생성
@@ -75,8 +80,8 @@ if 'df_preprocessed' not in st.session_state:
 if 'is_predicted' not in st.session_state:
      st.session_state.is_predicted = 0
 # make predicted dataframe
-if 'df_pred' not in st.session_state:
-     st.session_state.df_pred = None
+if 'df_predicted' not in st.session_state:
+     st.session_state.df_predicted = None
 
 # title
 st.title('PGM별 콜 예측')
@@ -88,7 +93,7 @@ def load_model(model_name, encoder_name, transformer_name):
 @st.cache(ttl=6000)
 def make_pred(df):
      encoded_df = preprocess.process_input(df, st.session_state.score, encoder)
-     return transformer.inverse_transform(model.predict(encoded_df).reshape(-1,1))
+     return pd.Series(transformer.inverse_transform(model.predict(encoded_df).reshape(-1,1)).reshape(-1),name='prediction').apply(round)
 
 @st.cache(persist=True)
 def load_test_x(test_name):
@@ -132,15 +137,15 @@ if 'score' not in st.session_state:
      st.session_state.score = load_score('model/brand_score.pkl','model/expression_score.pkl','model/midcat_score.pkl')
 score_load_state.text('Scores loaded!')
 
-# load ref
-test_load_state = st.text('Loading Test...')
-if 'test' not in st.session_state:
-     st.session_state.test = load_test_x('model/X_test_encoded.pkl')
-if 'test_y' not in st.session_state:
-     f = load_test_y('model/y_test.pkl')
-     st.session_state.test_y = pd.DataFrame(f)
-# st.dataframe(st.session_state.test_y)
-test_load_state.text('Test loaded!')
+# load test
+# test_load_state = st.text('Loading Test...')
+# if 'test' not in st.session_state:
+#      st.session_state.test = load_test_x('model/X_test_encoded.pkl')
+# if 'test_y' not in st.session_state:
+#      f = load_test_y('model/y_test.pkl')
+#      st.session_state.test_y = pd.DataFrame(f)
+# # st.dataframe(st.session_state.test_y)
+# test_load_state.text('Test loaded!')
 
 with st.form("백업파일 업로드", clear_on_submit=True):
      file = st.file_uploader("백업 파일을 드래그하여 업로드하세요. 업로드 시 현재 데이터는 사라지니 주의해주세요.")
@@ -161,31 +166,20 @@ with st.form("백업파일 업로드", clear_on_submit=True):
 def preprocess_df(raw_df):
      pass
 
-@st.cache(ttl=6000)
-def make_pred(model,target_df):
-     target_inv_trans = lambda call_: np.expm1(call_ ** (10/16))
-     target_df['예측값'] = target_inv_trans(model.predict(target_df))
-     return target_df
-
 @st.cache(ttl=600)
 def convert_df(df):
      # IMPORTANT: Cache the conversion to prevent computation on every rerun
-     return df.to_csv().encode('utf-8')
+     return df.to_csv(index=False).encode('utf-8-sig')
 
 @st.cache(ttl=600)
 def del_row(del_idx):
      return st.session_state.df_input.drop(labels=range(del_idx[0],del_idx[1]+1),axis=0).reset_index(drop=True)
 
-
-if st.session_state.preprocess_done == 1:
-     output = make_pred(model,dataframe)
-     st.session_state.predict_done = 1
-
 if st.session_state.predict_done == 1:   
      st.header('예측완료!')
-     st.write(output)
+     # st.write(output)
 
-     final_csv = convert_df(output)
+     # final_csv = convert_df(output)
 
      st.download_button(
           label="Download Prediction Table",
@@ -231,16 +225,25 @@ with st.sidebar.form(key='columns_in_form'):
           #      '전체 판매 상품 개수', 0
           # )
           st.write('**----------------------------------------------------**')
-          st.write('**각 상품의 중분류-브랜드-상품가격을 순서를 맞추어 입력해주세요**')
-          # st.write('**중복되는 브랜드-중분류 조합은 입력하지 않아도 됩니다.**')
+          # st.write('**각 상품의 중분류-브랜드-상품가격을 순서를 맞추어 입력해주세요**')
+          st.write('**중복되는 브랜드-중분류 조합은 입력하지 않아도 됩니다.**')
           midcat_input = st.multiselect(
                '판매 상품 중분류(전체)', st.session_state.ref['midcat_ref']
           ) 
           brand_input = st.multiselect(
                '판매 상품 브랜드(전체)', st.session_state.ref['brand_ref']
           )
-          price_input = st.multiselect(
-               '상품가격(전체)(천원)', st.session_state.ref['price_ref']
+          price_min_input = st.number_input(
+               '최저 상품 가격(천원)', 0,100000
+          )
+          price_max_input = st.number_input(
+               '최고 상품 가격(천원)', 0,100000
+          )
+          price_mean_input = st.number_input(
+               '상품 가격 평균(천원)', 0,100000
+          )
+          product_num_input = st.number_input(
+               '판매 상품 개수', 0,1000
           )
           st.write('**----------------------------------------------------**') 
 
@@ -263,18 +266,14 @@ with st.sidebar.form(key='columns_in_form'):
                                                                       'live_input':live_input,
                                                                       'midcat_input':midcat_input,
                                                                       'brand_input':brand_input,
-                                                                      'price_input':price_input,
+                                                                      'price_min_input':price_min_input,
+                                                                      'price_max_input':price_max_input,
+                                                                      'price_mean_input':price_mean_input,
+                                                                      'product_num_input':product_num_input,
                                                                  },ignore_index=True)
 
 col1, col2= st.columns([1.5,9])
-with col1:    
-     save = st.download_button(
-          label='임시저장',
-          data= pickle.dumps(st.session_state.df_input),
-          file_name=f'{str(datetime.datetime.now())[:-7]}_backup.pkl',
-     )             
-     # predict button
-     do_predict = st.button('예측')
+with col1:        
      # delete button
      if len(st.session_state.df_input)!=0:  
           delete_row = st.button('행 삭제하기')
@@ -295,39 +294,40 @@ with col2:
                except:
                    st.error('삭제 행의 범위를 다시 확인해주세요') 
 
+# show dataframe
+col1, col2, col3, col4 = st.columns([3,1.5,1.5,10])
+with col1:
+     st.subheader('입력된 데이터')
+with col2:
+     save = st.download_button(
+          label='임시저장',
+          data= pickle.dumps(st.session_state.df_input),
+          file_name=f'{str(datetime.datetime.now())[:-7]}_backup.pkl',
+     )   
+with col3:
+     do_predict = st.button('예측')
+
+# predict button
 if do_predict:
      # preprocess
      try:
-          st.session_state
+          st.session_state.df_predicted = pd.concat([make_pred(st.session_state.df_input),st.session_state.df_input],axis=1)
      except Exception as e:
           st.error(e)
           st.write(traceback.format_exc())
 
-# test_predicts
-test_predcit = st.button('테스트 예측')
-if 'test_predicted' not in st.session_state:
-     st.session_state.test_predicted = None
+st.dataframe(st.session_state.df_input)
 
-@st.cache(persist=True)
-def do_test_predict():
-     return transformer.inverse_transform(model.predict(st.session_state.test).reshape(-1,1))
-if test_predcit:
-     try:
-          st.session_state.test_predicted = do_test_predict()
-          st.session_state.test_y['예측값'] = do_test_predict()
-     except Exception as e:
-          st.write(traceback.format_exc())
-
-
-if st.session_state.test_predicted is not None:
-     st.dataframe(st.session_state.test_y)
-
-# show dataframe
-st.subheader('입력된 데이터')
-st.dataframe(st.session_state.df_input.style.format(precision=0))
-
-if st.session_state.is_predicted == 1:
-     st.subheader('전처리된 데이터')
+# show prediction
+st.subheader('예측결과')
+if st.session_state.df_predicted is not None:
+     st.dataframe(st.session_state.df_predicted)
+     st.download_button(
+          label="예측결과를 다운로드 받으세요",
+          data=convert_df(st.session_state.df_predicted),
+          file_name=str(datetime.datetime.now())[:-7]+'_prediction.csv',
+          mime='text/csv',
+     )
 
 
 with st.expander("See explanation"):
