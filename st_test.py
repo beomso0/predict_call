@@ -1,5 +1,6 @@
 #%%
 # import libraries
+from select import select
 import traceback
 from asyncore import close_all
 from base64 import encode
@@ -108,6 +109,10 @@ def load_score(brand_name, limit_name, midcat_name):
 def get_example_train():
      return preprocess.process_backup('example_df.csv')
 
+# @st.cache(ttl=6000)
+# def load_log(log_name):
+#      return pd.read_csv(log_name)
+
 # '''
 # DO TRAIN!!
 # '''
@@ -115,24 +120,21 @@ def get_example_train():
 # def do_train():
 #      pass
 
-train_example = get_example_train()
+# load files
+# train_log = load_log('train_log.csv')
 
-# load model, encoder, transformer
-# model_load_state = st.text('Loading model and encoder...')
-model, encoder, transformer = load_model('model/final_model.pkl','model/cat_encoder.pkl','model/boxcox_transformer.pkl')
-# model_load_state.text('Model and encoder loaded!')
-
-# load ref
-# ref_load_state = st.text('Loading Ref...')
+if 'train_log' not in st.session_state:
+     st.session_state.train_log = pd.read_csv('train_log.csv')
+if 'now_ver' not in st.session_state:
+     st.session_state.now_ver = st.session_state.train_log.now_ver.values[0]
 if 'ref' not in st.session_state:
      st.session_state.ref = load_ref('ref.pkl')
-# ref_load_state.text('Ref loaded!')
-
-# load score
-# score_load_state = st.text('Loading Scores...')
 if 'score' not in st.session_state:
      st.session_state.score = load_score('model/brand_score.pkl','model/expression_score.pkl','model/midcat_score.pkl')
-# score_load_state.text('Scores loaded!')
+
+train_example = get_example_train()
+model, encoder, transformer = load_model(f'model/models/final_model_ver{st.session_state.now_ver}.pkl','model/cat_encoder.pkl','model/boxcox_transformer.pkl')
+
 with st.form("백업파일 업로드", clear_on_submit=True):
      file = st.file_uploader("백업 파일을 드래그하여 업로드하세요. 업로드 시 현재 데이터는 사라지니 주의해주세요.")
      submitted = st.form_submit_button("업로드 및 적용")
@@ -263,7 +265,7 @@ with col2:
           file_name=f'{str(datetime.datetime.now())[:-7]}_backup.csv',
      )   
 with col3:
-     do_predict = st.button('예측')
+     do_predict = st.button(f'예측(model_ver{st.session_state.now_ver})')
 
 # predict button
 if do_predict:
@@ -275,8 +277,10 @@ if do_predict:
           st.write(traceback.format_exc())
 
 st.dataframe(st.session_state.df_input)
+
 st.text('')
 st.text('')
+
 # show prediction
 if st.session_state.df_predicted is not None:     
      st.subheader('예측결과')
@@ -287,9 +291,26 @@ if st.session_state.df_predicted is not None:
           file_name=str(datetime.datetime.now())[:-7]+'_prediction.csv',
           mime='text/csv',
      )
+
 st.text('')
 st.text('')
-with st.expander("모델 재학습"):     
+
+# change default version
+with st.expander('학습 log'):
+     st.dataframe(st.session_state.train_log)  
+     with st.form('모델 선택 및 변경', clear_on_submit=True):
+          select_ver = st.selectbox(
+               '모델을 선택해주세요(학습 및 예측이 모두 해당 버전의 모델로 진행되며, 창을 닫더라도 선택이 유지됩니다.)',
+               st.session_state.train_log.ver
+          )
+          selected = st.form_submit_button('모델 변경')
+          if selected: 
+               st.session_state.now_ver = select_ver
+               st.session_state.train_log['now_ver'] = select_ver
+               st.session_state.train_log.to_csv('train_log.csv',index=False)
+
+with st.expander("모델 재학습"):   
+     st.text('모델 학습이 완료되면, 학습이 끝난 최신 모델이 기본으로 설정됩니다.')
      with st.form("학습용 데이터 업로드", clear_on_submit=True):          
           st.text('이미 학습한 데이터를 재학습하지 않도록 주의해주세요')
           st.text('학습용 데이터: 예측결과 파일의 "prediction" 칼럼을 "target"(실제 인입콜 수)으로 대체한 데이터셋')
