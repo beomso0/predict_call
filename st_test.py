@@ -1,4 +1,3 @@
-#%%
 # import libraries
 from select import select
 import traceback
@@ -16,8 +15,6 @@ import joblib
 import ast
 import math
 import datetime
-# from pycaret.regression import *
-import s3fs
 import os
 import pickle
 from catboost import CatBoostRegressor
@@ -31,17 +28,9 @@ import preprocess
 import copy
 import os
 
-
-#%%
-# create S3 file system connection object
-fs = s3fs.S3FileSystem(anon=False)
-
 # set overall layout
 st.set_page_config(layout='wide')
 
-# declare session states
-# if 'file_uploaded' not in st.session_state:
-#      st.session_state.file_uploaded = 0
 if 'preprocess_done' not in st.session_state:
      st.session_state.preprocess_done = 0
 if 'predict_done' not in st.session_state:
@@ -50,8 +39,6 @@ if 'predict_done' not in st.session_state:
 # input dataframe 생성
 if 'df_input' not in st.session_state:
      st.session_state.df_input = pd.DataFrame(columns=[
-          # 추가: 'temp_input','end_time_input', 'start_time_input', 'date_input','pgm_input
-          # 삭제: 'year_input','month_input','time_input', 'weekday_input'
           'date_input',
           'holiday_input',
           'temp_input',
@@ -81,13 +68,13 @@ if 'df_predicted' not in st.session_state:
 
 # title
 st.title('PGM별 콜 예측')
+
 st.text('')
 st.text('')
 
 @st.cache(ttl=6000)
 def load_model(model_name, encoder_name, transformer_name):
-     with fs.open(model_name) as f1,fs.open(encoder_name) as f2,fs.open(transformer_name) as f3: 
-          return joblib.load(f1), joblib.load(f2), joblib.load(f3)
+     return joblib.load(model_name), joblib.load(encoder_name), joblib.load(transformer_name)
 
 @st.cache(ttl=6000)
 def make_pred(df):
@@ -110,32 +97,14 @@ def load_score(brand_name, limit_name, midcat_name):
 @st.cache(ttl=6000)
 def get_example_train():
      return preprocess.process_backup('example_df.csv')
-
-# @st.cache(ttl=6000)
-# def load_log(log_name):
-#      return pd.read_csv(log_name)
-
-# '''
-# DO TRAIN!!
-# '''
-# @st.cache(ttl=6000)
-# def do_train():
-#      pass
-
-# load files
-# train_log = load_log('train_log.csv')
-
-if 'train_log' not in st.session_state:
-     st.session_state.train_log = pd.read_csv('train_log.csv')
-if 'now_ver' not in st.session_state:
-     st.session_state.now_ver = st.session_state.train_log.now_ver.values[0]
+     
 if 'ref' not in st.session_state:
      st.session_state.ref = load_ref('ref.pkl')
 if 'score' not in st.session_state:
      st.session_state.score = load_score('model/brand_score.pkl','model/expression_score.pkl','model/midcat_score.pkl')
 
 train_example = get_example_train()
-model, encoder, transformer = load_model(f'model/models/final_model_ver{st.session_state.now_ver}.pkl','model/cat_encoder.pkl','model/boxcox_transformer.pkl')
+model, encoder, transformer = load_model(f'model/final_model.pkl','model/cat_encoder.pkl','model/boxcox_transformer.pkl')
 
 with st.form("백업파일 업로드", clear_on_submit=True):
      file = st.file_uploader("백업 파일을 드래그하여 업로드하세요. 업로드 시 현재 데이터는 사라지니 주의해주세요.")
@@ -143,7 +112,9 @@ with st.form("백업파일 업로드", clear_on_submit=True):
 
      if submitted and file is not None:
           st.session_state.df_input = preprocess.process_backup(file)
+
 st.text('')
+
 def convert_df(df):
      # IMPORTANT: Cache the conversion to prevent computation on every rerun
      return df.to_csv(index=False).encode('utf-8-sig')
@@ -185,12 +156,6 @@ with st.sidebar.form(key='columns_in_form'):
           live_input = st.checkbox(
                'LIVE 방송 여부', True
           )
-          # prd_num_input = st.number_input(
-          #      '전체 판매 상품 개수', 0
-          # )
-          st.write('**----------------------------------------------------**')
-          # st.write('**각 상품의 중분류-브랜드-상품가격을 순서를 맞추어 입력해주세요**')
-          st.write('**중복되는 브랜드-중분류 조합은 입력하지 않아도 됩니다.**')
           midcat_input = st.multiselect(
                '판매 상품 중분류(전체)', st.session_state.ref['midcat_ref']
           ) 
@@ -209,7 +174,6 @@ with st.sidebar.form(key='columns_in_form'):
           product_num_input = st.number_input(
                '판매 상품 개수', 0,1000
           )
-          st.write('**----------------------------------------------------**') 
 
           # submit
           submitted = st.form_submit_button('Submit')
@@ -256,6 +220,7 @@ with col2:
                     st.session_state.df_input = st.session_state.df_input.drop(labels=list(range(del_idx[0],del_idx[1]+1)),axis=0).reset_index(drop=True)
                except:
                    st.error('삭제 행의 범위를 다시 확인해주세요') 
+                   
 # show dataframe
 col1, col2, col3, col4 = st.columns([4,1.9,1.5,10])
 with col1:
@@ -267,7 +232,7 @@ with col2:
           file_name=f'{str(datetime.datetime.now())[:-7]}_backup.csv',
      )   
 with col3:
-     do_predict = st.button(f'예측(model_ver{st.session_state.now_ver})')
+     do_predict = st.button(f'예측')
 
 # predict button
 if do_predict:
@@ -294,33 +259,33 @@ if st.session_state.df_predicted is not None:
           mime='text/csv',
      )
 
-st.text('')
-st.text('')
+# st.text('')
+# st.text('')
 
-# change default version
-with st.expander('학습 log'):
-     st.dataframe(st.session_state.train_log)  
-     with st.form('모델 선택 및 변경', clear_on_submit=True):
-          select_ver = st.selectbox(
-               '모델을 선택해주세요(학습 및 예측이 모두 해당 버전의 모델로 진행되며, 창을 닫더라도 선택이 유지됩니다.)',
-               st.session_state.train_log.ver
-          )
-          selected = st.form_submit_button('모델 변경')
-          if selected: 
-               st.session_state.now_ver = select_ver
-               st.session_state.train_log['now_ver'] = select_ver
-               st.session_state.train_log.to_csv('train_log.csv',index=False)
+# # change default version
+# with st.expander('학습 log'):
+#      st.dataframe(st.session_state.train_log)  
+#      with st.form('모델 선택 및 변경', clear_on_submit=True):
+#           select_ver = st.selectbox(
+#                '모델을 선택해주세요(학습 및 예측이 모두 해당 버전의 모델로 진행되며, 창을 닫더라도 선택이 유지됩니다.)',
+#                st.session_state.train_log.ver
+#           )
+#           selected = st.form_submit_button('모델 변경')
+#           if selected: 
+#                st.session_state.now_ver = select_ver
+#                st.session_state.train_log['now_ver'] = select_ver
+#                st.session_state.train_log.to_csv('train_log.csv',index=False)
 
-with st.expander("모델 재학습"):   
-     st.text('모델 학습이 완료되면, 학습이 끝난 최신 모델이 기본으로 설정됩니다.')
-     with st.form("학습용 데이터 업로드", clear_on_submit=True):          
-          st.text('이미 학습한 데이터를 재학습하지 않도록 주의해주세요')
-          st.text('학습용 데이터: 예측결과 파일의 "prediction" 칼럼을 "target"(실제 인입콜 수)으로 대체한 데이터셋')
-          st.text('<예시>')
-          st.dataframe(train_example)
-          file = st.file_uploader("학습용 데이터를 업로드 해주세요")
-          submitted = st.form_submit_button("업로드 및 학습 시작")
-          if submitted and file is not None:
-               # do something
-               pass
+# with st.expander("모델 재학습"):   
+#      st.text('모델 학습이 완료되면, 학습이 끝난 최신 모델이 기본으로 설정됩니다.')
+#      with st.form("학습용 데이터 업로드", clear_on_submit=True):          
+#           st.text('이미 학습한 데이터를 재학습하지 않도록 주의해주세요')
+#           st.text('학습용 데이터: 예측결과 파일의 "prediction" 칼럼을 "target"(실제 인입콜 수)으로 대체한 데이터셋')
+#           st.text('<예시>')
+#           st.dataframe(train_example)
+#           file = st.file_uploader("학습용 데이터를 업로드 해주세요")
+#           submitted = st.form_submit_button("업로드 및 학습 시작")
+#           if submitted and file is not None:
+#                # do something
+#                pass
      
