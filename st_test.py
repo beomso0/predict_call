@@ -116,10 +116,6 @@ def load_score(brand_name, limit_name, midcat_name):
      ]
      return score_lists
 
-@st.cache(ttl=6000)
-def apply_backup(backup):
-     st.session_state.df_input = backup
-
 # load model, encoder, transformer
 model_load_state = st.text('Loading model and encoder...')
 model, encoder, transformer = load_model('model/final_model.pkl','model/cat_encoder.pkl','model/boxcox_transformer.pkl')
@@ -152,15 +148,7 @@ with st.form("백업파일 업로드", clear_on_submit=True):
      submitted = st.form_submit_button("업로드 및 적용")
 
      if submitted and file is not None:
-          st.session_state.df_input = joblib.load(file)
-
-
-# uploaded_file = st.file_uploader("Drag and drop a file", on_change=apply_backup)
-# if uploaded_file is not None:
-#      # Can be used wherever a "file-like" object is accepted:
-#      # dataframe = pd.read_csv(uploaded_file)
-#      st.session_state.df_input = joblib.load(uploaded_file)
-#      uploaded_file = None
+          st.session_state.df_input = preprocess.process_backup(file)
 
 @st.cache(ttl=6000)
 def preprocess_df(raw_df):
@@ -174,19 +162,6 @@ def convert_df(df):
 @st.cache(ttl=600)
 def del_row(del_idx):
      return st.session_state.df_input.drop(labels=range(del_idx[0],del_idx[1]+1),axis=0).reset_index(drop=True)
-
-if st.session_state.predict_done == 1:   
-     st.header('예측완료!')
-     # st.write(output)
-
-     # final_csv = convert_df(output)
-
-     st.download_button(
-          label="Download Prediction Table",
-          data=final_csv,
-          file_name='prediction.csv',
-          mime='text/csv',
-     )
 
 # sidebar form
 with st.sidebar.form(key='columns_in_form'):       
@@ -252,7 +227,6 @@ with st.sidebar.form(key='columns_in_form'):
           # update dataframe
 
           if submitted:
-               print(showhost_input)
                st.session_state.df_input = st.session_state.df_input.append({
                                                                       'date_input':date_input,
                                                                       'holiday_input':holiday_input,
@@ -295,14 +269,14 @@ with col2:
                    st.error('삭제 행의 범위를 다시 확인해주세요') 
 
 # show dataframe
-col1, col2, col3, col4 = st.columns([3,1.5,1.5,10])
+col1, col2, col3, col4 = st.columns([4,1.9,1.5,10])
 with col1:
      st.subheader('입력된 데이터')
 with col2:
      save = st.download_button(
           label='임시저장',
-          data= pickle.dumps(st.session_state.df_input),
-          file_name=f'{str(datetime.datetime.now())[:-7]}_backup.pkl',
+          data= convert_df(st.session_state.df_input),
+          file_name=f'{str(datetime.datetime.now())[:-7]}_backup.csv',
      )   
 with col3:
      do_predict = st.button('예측')
@@ -319,18 +293,35 @@ if do_predict:
 st.dataframe(st.session_state.df_input)
 
 # show prediction
-st.subheader('예측결과')
-if st.session_state.df_predicted is not None:
-     st.dataframe(st.session_state.df_predicted)
+if st.session_state.df_predicted is not None:     
+     st.subheader('예측결과')
+     st.dataframe(st.session_state.df_predicted.style.bar(subset=['prediction'],color='#239b8a',vmin=0,vmax=3000))
      st.download_button(
-          label="예측결과를 다운로드 받으세요",
+          label="예측결과 다운로드",
           data=convert_df(st.session_state.df_predicted),
           file_name=str(datetime.datetime.now())[:-7]+'_prediction.csv',
           mime='text/csv',
      )
 
+@st.cache(ttl=6000)
+def get_example_train(ex_name):
+     return preprocess.process_backup(ex_name)
 
-with st.expander("See explanation"):
-     st.header('모델 재학습')
+@st.cache(ttl=6000)
+def do_train():
+     pass
+
+train_example = get_example_train('example_df.csv')
+
+with st.expander("모델 재학습"):     
+     with st.form("학습용 데이터 업로드", clear_on_submit=True):          
+          st.text('이미 학습한 데이터를 재학습하지 않도록 주의해주세요')
+          st.text('학습 데이터는, 예측 결과 파일의 "prediction" 칼럼명을 "target"으로 바꾼 후, 실제 인입콜을 해당 칼럼에 입력한 데이터셋입니다.')
+          st.dataframe(train_example)
+          file = st.file_uploader("학습용 데이터를 업로드 해주세요")
+          submitted = st.form_submit_button("업로드 및 학습 시작")
+          if submitted and file is not None:
+               # do something
+               do_train() 
 
      
