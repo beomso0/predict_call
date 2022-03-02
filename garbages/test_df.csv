@@ -1,3 +1,4 @@
-﻿date_input,holiday_input,temp_input,pgm_input,start_time_input,end_time_input,duration_input,showhost_input,expression_input,live_input,midcat_input,brand_input,price_min_input,price_max_input,price_mean_input,product_num_input
-2022-03-04,TRUE,7,345321,21,22,60,"['신성애', '이경은']",['기간한정'],TRUE,"['건강', '영상/음향', '헬스용품']","['헤드', '아이스크림홈런']",130,220,100,10
-2022-03-24,TRUE,10,211432,12,13,70,['최현우'],"['기간한정', '최대']",TRUE,['계절가전'],"['LG(엘지)', '삼성(SAMSUNG)']",1000,2000,1500,4
+date_input,holiday_input,temp_input,pgm_input,start_time_input,end_time_input,duration_input,showhost_input,expression_input,live_input,midcat_input,brand_input,price_min_input,price_max_input,price_mean_input,product_num_input
+2022.3.4,TRUE,7,345321,21,22,60,"['신성애', '이경은']",['기간한정'],TRUE,"['건강', '영상/음향', '헬스용품']","['헤드', '아이스크림홈런']",130,220,100,10
+2022.3.24,TRUE,10,211432,12,13,70,['최현우'],"['기간한정', '최대']",TRUE,['계절가전'],"['LG(엘지)', '삼성(SAMSUNG)']",1000,2000,1500,4
+2022.3.24,TRUE,12,211432,12,13,70,['최현우'],"['기간한정', '최대']",TRUE,['계절가전'],"['헤드', '삼성(SAMSUNG)']",1000,2000,1500,4
