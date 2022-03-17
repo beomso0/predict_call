@@ -4,7 +4,7 @@ import copy
 import datetime
 
 def process_backup(backup_csv):
-    df = pd.read_csv(backup_csv)
+    df = pd.read_csv(backup_csv,encoding='cp949')
     df['date_input'] = df['date_input'].apply(lambda x: datetime.date(int(x[:4]), int(x[5:7]),int(x[8:10])))
     for c in ['showhost_input',	'expression_input', 'midcat_input',	'brand_input']:
         df[c] = df[c].apply(lambda x: sorted(eval(x)))
