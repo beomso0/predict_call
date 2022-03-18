@@ -1,7 +1,10 @@
+#%%
 import numpy as np
 import pandas as pd
 import copy
 import datetime
+
+
 
 def process_backup(backup_csv):
     try:
@@ -11,7 +14,7 @@ def process_backup(backup_csv):
             df = pd.read_csv(backup_csv)
     except:
         try:
-            df = pd.read_excel(backup_csv,encoding='cp949')
+            df = pd.read_excel(backup_csv,encoding='utf-8')
         except:
             df = pd.read_excel(backup_csv)
 
@@ -22,6 +25,7 @@ def process_backup(backup_csv):
 
     for c in ['showhost_input',	'expression_input', 'midcat_input',	'brand_input']:
         df[c] = df[c].apply(lambda x: sorted(eval(x)))
+
     return df
 
 def process_input(input_df,score_lists,cat_encoder):
